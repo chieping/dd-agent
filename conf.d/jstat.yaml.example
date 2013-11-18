@@ -1,0 +1,6 @@
+init_config:
+
+instances:
+  - tomcat_service: "tomcat-mmr"
+    tags:
+      - "service:view"
