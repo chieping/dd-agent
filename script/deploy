@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+HOST=$@
+
+# Transfer plugin files
+
+scp checks.d/jstat.py root@${HOST}:/etc/dd-agent/checks.d/jstat.py
+scp conf.d/jstat.yaml.example root@${HOST}:/etc/dd-agent/conf.d/jstat.yaml
+
+# Restart datadog-agent
+
+ssh root@${HOST} "/etc/init.d/datadog-agent restart"
+
