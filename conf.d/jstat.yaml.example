@@ -55,7 +55,7 @@ init_config:
     # - gc.total.time
 
 instances:
-  - tomcat_service: "tomcat-mmr"
+  - search_string: "tomcat"
     tags:
       - "environment:staging" 
       - "service:view"
