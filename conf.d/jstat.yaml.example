@@ -5,6 +5,6 @@ instances:
     jstat: "/usr/java/default/bin/jstat"
     tags:
       - "environment:staging" 
-      - "service:view"
+      - "jvm_instance:view.tomcat"
 
 
