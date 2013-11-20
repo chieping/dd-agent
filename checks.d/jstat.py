@@ -85,6 +85,11 @@ class Jstat(AgentCheck):
             "metric":          "jstat.gc.time",
             "additional_tag":  "gc_type:full"
             },
+              "GCC": {
+            "metric":          "jstat.gc.count",
+            "additional_tag":  "gc_type:total",
+            "emission":        False
+            },
               "GCT": {
             "metric":          "jstat.gc.time",
             "additional_tag":  "gc_type:total",
@@ -125,6 +130,7 @@ class Jstat(AgentCheck):
         dic["EF"]  = dic["EC"]  - dic["EU"]
         dic["OF"]  = dic["OC"]  - dic["OU"]
         dic["PF"]  = dic["PC"]  - dic["PU"]
+        dic["GCC"] = dic["YGC"] + dic["FGC"]
 
         for name, value in dic.iteritems():
             conf = self.CONFS[name]
