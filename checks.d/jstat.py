@@ -6,11 +6,13 @@ class Jstat(AgentCheck):
     CONFS = {
               "S0C": {
             "metric":          "heap.survivor.0",
-            "additional_tag":  "jstat_state:current"
+            "additional_tag":  "jstat_state:current",
+            "emission":        False
             },
               "S1C": {
             "metric":          "heap.survivor.1",
-            "additional_tag":  "jstat_state:current"
+            "additional_tag":  "jstat_state:current",
+            "emission":        False
             },
               "S0U": {
             "metric":          "heap.survivor.0",
@@ -30,7 +32,8 @@ class Jstat(AgentCheck):
             },
               "EC": {
             "metric":          "heap.eden",
-            "additional_tag":  "jstat_state:current"
+            "additional_tag":  "jstat_state:current",
+            "emission":        False
              },
               "EU": {
             "metric":          "heap.eden",
@@ -42,7 +45,8 @@ class Jstat(AgentCheck):
             },
               "OC": {
             "metric":          "heap.old",
-            "additional_tag":  "jstat_state:current"
+            "additional_tag":  "jstat_state:current",
+            "emission":        False
             },
               "OU": {
             "metric":          "heap.old",
@@ -54,7 +58,8 @@ class Jstat(AgentCheck):
             },
               "PC": {
             "metric":          "heap.permanent",
-            "additional_tag":  "jstat_state:current"
+            "additional_tag":  "jstat_state:current",
+            "emission":        False
             },
               "PU": {
             "metric":          "heap.permanent",
@@ -118,5 +123,7 @@ class Jstat(AgentCheck):
         for name, value in dic.iteritems():
             conf = self.CONFS[name]
             additional_tag = conf.get("additional_tag", None)
+            emission = conf.get("emission", True)
             each_tags = tags + (additional_tag, ) if additional_tag is not None else tags
-            self.gauge(conf["metric"], value, each_tags)
+            if emission:
+                self.gauge(conf["metric"], value, each_tags)
