@@ -123,6 +123,11 @@ class Jstat(AgentCheck):
         gc_names = ["S0C","S1C","S0U","S1U","EC","EU","OC","OU","PC","PU","YGC","YGCT","FGC","FGCT","GCT"]
         dic = dict(zip(gc_names, values))
 
+        # heapの単位をByteに合わせる
+        heap_keys = filter(lambda str: "GC" not in str, gc_names)
+        for key in heap_keys:
+            dic[key] = dic[key] * 1024
+
         # calcurate free
         dic["S0F"] = dic["S0C"] - dic["S0U"]
         dic["S1F"] = dic["S1C"] - dic["S1U"]
