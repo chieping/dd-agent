@@ -5,84 +5,90 @@ from checks import AgentCheck
 class Jstat(AgentCheck):
     CONFS = {
               "S0C": {
-            "metric":          "heap.survivor.0",
-            "additional_tag":  "jstat_state:current",
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:survivor_0.current",
             "emission":        False
             },
               "S1C": {
-            "metric":          "heap.survivor.1",
-            "additional_tag":  "jstat_state:current",
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:survivor_1.current",
             "emission":        False
             },
               "S0U": {
-            "metric":          "heap.survivor.0",
-            "additional_tag":  "jstat_state:used"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:survivor_0.used"
             },
               "S1U": {
-            "metric":          "heap.survivor.1",
-            "additional_tag":  "jstat_state:used"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:survivor_1.used"
             },
               "S0F": {
-            "metric":          "heap.survivor.0",
-            "additional_tag":  "jstat_state:free"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:survivor_0.free"
             },
               "S1F": {
-            "metric":          "heap.survivor.1",
-            "additional_tag":  "jstat_state:free"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:survivor_1.free"
             },
               "EC": {
-            "metric":          "heap.eden",
-            "additional_tag":  "jstat_state:current",
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:eden.current",
             "emission":        False
              },
               "EU": {
-            "metric":          "heap.eden",
-            "additional_tag":  "jstat_state:used"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:eden.used"
             },
               "EF": {
-            "metric":          "heap.eden",
-            "additional_tag":  "jstat_state:free"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:eden.free"
             },
               "OC": {
-            "metric":          "heap.old",
-            "additional_tag":  "jstat_state:current",
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:old.current",
             "emission":        False
             },
               "OU": {
-            "metric":          "heap.old",
-            "additional_tag":  "jstat_state:used"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:old.used"
             },
               "OF": {
-            "metric":          "heap.old",
-            "additional_tag":  "jstat_state:free"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:old.free"
             },
               "PC": {
-            "metric":          "heap.permanent",
-            "additional_tag":  "jstat_state:current",
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:permanent.current",
             "emission":        False
             },
               "PU": {
-            "metric":          "heap.permanent",
-            "additional_tag":  "jstat_state:used"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:permanent.used"
             },
               "PF": {
-            "metric":          "heap.permanent",
-            "additional_tag":  "jstat_state:free"
+            "metric":          "jstat.heap_memory",
+            "additional_tag":  "heap_type:permanent.free"
             },
               "YGC": {
-            "metric":          "gc.young.count"
+            "metric":          "jstat.gc.count",
+            "additional_tag":  "gc_type:young"
             },
               "YGCT": {
-            "metric":          "gc.young.time"
+            "metric":          "jstat.gc.time",
+            "additional_tag":  "gc_type:young"
             },
               "FGC": {
-            "metric":          "gc.full.count"
+            "metric":          "jstat.gc.count",
+            "additional_tag":  "gc_type:full"
             },
               "FGCT": {
-            "metric":          "gc.full.time"
+            "metric":          "jstat.gc.time",
+            "additional_tag":  "gc_type:full"
             },
               "GCT": {
-            "metric":          "gc.total.time"
+            "metric":          "jstat.gc.time",
+            "additional_tag":  "gc_type:total",
+            "emission":        False
             }
           }
 
