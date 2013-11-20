@@ -105,21 +105,20 @@ class Jstat(AgentCheck):
 
         jstat = instance.get("jstat", "/usr/java/default/bin/jstat")
 
-        # process.pyを見るとpsutilという外部ライブラリを使ってpidを取ってきたり
-        # なんかしてるけど外部ライブラリの管理とかがよくわかっていないのでpsコマンドから
-        # 取得します。
         search_string = instance.get('search_string', None)
-        if search_string is None:
-            raise KeyError('The "search_string" is mandatory')
+        pid_filepath = instance.get('pid_file', None)
 
-        out = commands.getoutput('ps -ef | grep "%s" | grep -v grep' % search_string)
-        pids = out.split("\n")
-        if len(pids) is not 1:
-            raise EnvironmentError("Searching result must include ONE pid. Actual had %d. SearchString: %s" % (len(pids), search_string))
+        if pid_filepath is None and search_string is None:
+            raise KeyError('"pid_file" or "search_string" is mandatory')
 
-        # PID is indexed second column
-        calculated_pid = pids[0].split()[1]
-        values = map(lambda str: float(str), commands.getoutput('sudo %s -gc %s | tail -1' % (jstat, calculated_pid)).split())
+        pid = self._find_pid_by_search_string(search_string) if pid_filepath is None else self._find_pid_by_pidfile(pid_filepath)
+        self.log.info(pid)
+        self.log.info(jstat)
+
+        self.log.info('sudo %s -gc %s | tail -1' % (jstat, pid))
+        values = map(lambda str: float(str), commands.getoutput('sudo %s -gc %s | tail -1' % (jstat, pid)).split())
+
+        self.log.info(values)
 
         gc_names = ["S0C","S1C","S0U","S1U","EC","EU","OC","OU","PC","PU","YGC","YGCT","FGC","FGCT","GCT"]
         dic = dict(zip(gc_names, values))
@@ -139,3 +138,21 @@ class Jstat(AgentCheck):
             each_tags = tags + (additional_tag, ) if additional_tag is not None else tags
             if emission:
                 self.gauge(conf["metric"], value, each_tags)
+
+    def _find_pid_by_pidfile(self, pid_filepath):
+        # This function expects that file content is written only pid number.
+        #
+        # 現状だとtomcatのpidファイルのディレクトリ(temp)にRead権限がないため
+        # (camptocamp/puppet-tomcatで設定される)Permission Denied と言われてしまう
+        return open(pid_filepath, "r").read().strip()
+
+    def _find_pid_by_search_string(self, search_string):
+        # process.pyを見るとpsutilという外部ライブラリを使ってpidを取ってきたり
+        # なんかしてるけど外部ライブラリの管理とかがよくわかっていないのでpsコマンドから
+        # 取得します。
+        out = commands.getoutput('ps -ef | grep "%s" | grep -v grep' % search_string)
+        pids = out.split("\n")
+        if len(pids) is not 1:
+            raise EnvironmentError("Searching result must include ONE pid. Actual had %d. SearchString: %s" % (len(pids), search_string))
+        # PID is indexed second column
+        return pids[0].split()[1]

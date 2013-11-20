@@ -1,7 +1,13 @@
 init_config:
 
 instances:
-  - search_string: "tomcat"
+  # PIDを指定する方法は2種類あります。
+  # - pid_file:      pidファイルのパスを指定
+  # - search_string: ps -ef の出力結果から絞り込む文字列を指定
+  # 少なくともいずれかひとつ以上の指定をする必要があります。
+
+  - pid_file: "/srv/tomcat/mmr/temp/tomcat.pid"
+    search_string: "tomcat"
     jstat: "/usr/java/default/bin/jstat"
     tags:
       - "environment:staging" 
