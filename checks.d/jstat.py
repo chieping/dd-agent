@@ -102,28 +102,19 @@ class Jstat(AgentCheck):
         if tags is None:
             raise KeyError('The "tags" is mandatory')
         tags = tuple(tags)
-
         jstat = instance.get("jstat", "/usr/java/default/bin/jstat")
-
         search_string = instance.get('search_string', None)
         pid_filepath = instance.get('pid_file', None)
-
         if pid_filepath is None and search_string is None:
             raise KeyError('"pid_file" or "search_string" is mandatory')
 
         pid = self._find_pid_by_search_string(search_string) if pid_filepath is None else self._find_pid_by_pidfile(pid_filepath)
-        self.log.info(pid)
-        self.log.info(jstat)
-
-        self.log.info('sudo %s -gc %s | tail -1' % (jstat, pid))
         values = map(lambda str: float(str), commands.getoutput('sudo %s -gc %s | tail -1' % (jstat, pid)).split())
-
-        self.log.info(values)
 
         gc_names = ["S0C","S1C","S0U","S1U","EC","EU","OC","OU","PC","PU","YGC","YGCT","FGC","FGCT","GCT"]
         dic = dict(zip(gc_names, values))
 
-        # heapの単位をByteに合わせる
+        # Make heap metrics' unit byte
         heap_keys = filter(lambda str: "GC" not in str, gc_names)
         for key in heap_keys:
             dic[key] = dic[key] * 1024
