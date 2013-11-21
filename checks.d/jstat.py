@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import commands, re
+import commands
 from checks import AgentCheck
 
 class Jstat(AgentCheck):
@@ -98,17 +98,15 @@ class Jstat(AgentCheck):
           }
 
     def check(self, instance):
-        tags = instance.get("tags", None)
-        if tags is None:
-            raise KeyError('The "tags" is mandatory')
-        tags = tuple(tags)
-        jstat = instance.get("jstat", "/usr/java/default/bin/jstat")
-        search_string = instance.get('search_string', None)
-        pid_filepath = instance.get('pid_file', None)
-        if pid_filepath is None and search_string is None:
-            raise KeyError('"pid_file" or "search_string" is mandatory')
+        name = instance.get("name", None)
+        tags = ('jvm_instance:%s' % name, ) + tuple(instance.get("tags", []))
 
-        pid = self._find_pid_by_search_string(search_string) if pid_filepath is None else self._find_pid_by_pidfile(pid_filepath)
+        jstat = instance.get("jstat", "/usr/java/default/bin/jstat")
+
+        pid = self._find_pid(instance)
+        if pid is None:
+            raise Exception('No pid found for %s. Please check your config yaml.' % name)
+
         values = map(lambda str: float(str), commands.getoutput('sudo %s -gc %s | tail -1' % (jstat, pid)).split())
 
         gc_names = ["S0C","S1C","S0U","S1U","EC","EU","OC","OU","PC","PU","YGC","YGCT","FGC","FGCT","GCT"]
@@ -129,26 +127,32 @@ class Jstat(AgentCheck):
 
         for name, value in dic.iteritems():
             conf = self.CONFS[name]
-            additional_tag = conf.get("additional_tag", None)
-            emission = conf.get("emission", True)
-            each_tags = tags + (additional_tag, ) if additional_tag is not None else tags
-            if emission:
-                self.gauge(conf["metric"], value, each_tags)
+            if conf.get("emission", True):
+                self.gauge(conf["metric"], value, tags + (conf["additional_tag"], ))
 
-    def _find_pid_by_pidfile(self, pid_filepath):
-        # This function expects that file content is written only pid number.
-        #
-        # 現状だとtomcatのpidファイルのディレクトリ(temp)にRead権限がないため
-        # (camptocamp/puppet-tomcatで設定される)Permission Denied と言われてしまう
-        return open(pid_filepath, "r").read().strip()
+    def _find_pid(self, instance):
+        pid_filepath  = instance.get('pid_file', None)
 
-    def _find_pid_by_search_string(self, search_string):
-        # process.pyを見るとpsutilという外部ライブラリを使ってpidを取ってきたり
-        # なんかしてるけど外部ライブラリの管理とかがよくわかっていないのでpsコマンドから
-        # 取得します。
-        out = commands.getoutput('ps -ef | grep "%s" | grep -v grep' % search_string)
-        pids = out.split("\n")
-        if len(pids) is not 1:
-            raise EnvironmentError("Searching result must include ONE pid. Actual had %d. SearchString: %s" % (len(pids), search_string))
-        # PID is indexed second column
-        return pids[0].split()[1]
+        if pid_filepath is not None:
+            return open(pid_filepath, "r").read().strip()
+
+        search_regex = instance.get('search_regex', None)
+        user          = instance.get('user', None)
+
+        if search_regex is None:
+            raise KeyError('"search_regex" is mandatory')
+
+        return self._find_pid_by_search_regex(search_regex, user)
+
+
+    def _find_pid_by_search_regex(self, search_regex, user):
+        import psutil, re
+
+        pattern = re.compile(search_regex)
+        for proc in psutil.process_iter():
+            cmdline = " ".join(proc.cmdline)
+            if user is None or proc.username == user:
+                if pattern.search(cmdline):
+                    return proc.pid
+
+        return None
