@@ -1,16 +1,22 @@
 init_config:
 
 instances:
-  # PIDを指定する方法は2種類あります。
-  # - pid_file:      pidファイルのパスを指定
-  # - search_string: ps -ef の出力結果から絞り込む文字列を指定
-  # 少なくともいずれかひとつ以上の指定をする必要があります。
+  - name: "tomcat"
+    jstat: "/usr/bin/jstat"
+    search_regex: "tomcat"
+    user: "tomcat"
 
-  - pid_file: "/srv/tomcat/mmr/temp/tomcat.pid"
-    search_string: "tomcat"
-    jstat: "/usr/java/default/bin/jstat"
-    tags:
-      - "environment:staging" 
-      - "jvm_instance:view.tomcat"
+  - name: "tomcat-with-jsvc"
+    jstat: "/usr/bin/jstat"
+    search_regex: "jsvc.exec"
+    user: "tomcat"
 
+  - name: "jenkins-master"
+    jstat: "/usr/bin/jstat"
+    search_regex: "jenkins"
+    user: "jenkins"
 
+  - name: "jenkins-slave"
+    jstat: "/usr/bin/jstat"
+    search_regex: "^java -jar slave\.jar"
+    user: "jenkins"
